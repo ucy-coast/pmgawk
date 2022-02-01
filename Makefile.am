@@ -102,6 +102,7 @@ base_sources = \
 	msg.c \
 	node.c \
 	nonposix.h \
+	pmem.c \
 	profile.c \
 	protos.h \
 	re.c \
