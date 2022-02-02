@@ -29,6 +29,7 @@
 
 #include "awk.h"
 #include "getopt.h"
+#include "pma.h"
 
 #ifdef HAVE_MCHECK_H
 #include <mcheck.h>
@@ -48,6 +49,8 @@ typedef void *stackoverflow_context_t;
 #define DEFAULT_VARFILE		"awkvars.out"	/* where to put vars */
 #define DEFAULT_PREC		53
 #define DEFAULT_ROUNDMODE	"N"		/* round to nearest */
+
+#define PERSIST 1000
 
 static const char *varfile = DEFAULT_VARFILE;
 const char *command_file = NULL;	/* debugger commands */
@@ -167,6 +170,8 @@ const char def_strftime_format[] = "%a %b %e %H:%M:%S %Z %Y";
 
 extern const char *version_string;
 
+char* persist_backingfilename = NULL;
+
 #if defined (HAVE_GETGROUPS) && defined(NGROUPS_MAX) && NGROUPS_MAX > 0
 GETGROUPS_T *groupset;		/* current group set */
 int ngroups;			/* size of said set */
@@ -198,6 +203,7 @@ static const struct option optab[] = {
 	{ "no-optimize",	no_argument,		NULL,	's' },
 	{ "nostalgia",		no_argument,		& do_nostalgia,	1 },
 	{ "optimize",		no_argument,		NULL,	'O' },
+	{ "persist", required_argument, NULL, PERSIST },
 #if defined(YYDEBUG) || defined(GAWKDEBUG)
 	{ "parsedebug",		no_argument,		NULL,	'Y' },
 #endif
@@ -308,6 +314,12 @@ main(int argc, char **argv)
 	push_context(new_context());
 
 	parse_args(argc, argv);
+
+	if (persist_backingfilename) {
+		if (pma_init(persist_backingfilename) < 0) {
+			fatal(_("persistent memory allocator failed to initialize"));
+		}
+	}
 
 #if defined(LOCALEDEBUG)
 	if (locale != initial_locale)
@@ -593,6 +605,7 @@ usage(int exitval, FILE *fp)
 	fputs(_("POSIX options:\t\tGNU long options: (standard)\n"), fp);
 	fputs(_("\t-f progfile\t\t--file=progfile\n"), fp);
 	fputs(_("\t-F fs\t\t\t--field-separator=fs\n"), fp);
+	fputs(_("\t\t\t\t--persist=file\n"), fp);
 	fputs(_("\t-v var=val\t\t--assign=var=val\n"), fp);
 	fputs(_("Short options:\t\tGNU long options: (extensions)\n"), fp);
 	fputs(_("\t-b\t\t\t--characters-as-bytes\n"), fp);
@@ -1714,6 +1727,13 @@ parse_args(int argc, char **argv)
 			 * instead of returning a letter. Do nothing, just
 			 * cycle around for the next one.
 			 */
+			break;
+
+		case PERSIST:
+			if (optarg[0] == '\0')
+				warning(_("empty argument to `--persist' ignored"));
+			else
+				persist_backingfilename = optarg;
 			break;
 
 		case 'Y':
