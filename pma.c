@@ -9,7 +9,9 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include "pmem.h"
+#include "pma.h"
+
+typedef uintptr_t pmo_t;  /* "persistent memory offset type" */
 
 static_assert(sizeof(pmo_t) == sizeof(void *),     /* C11 */
               "offsets & pointers incompatible");
@@ -36,6 +38,10 @@ static size_t  e_len;   /* length of in-memory image */
   (0 == (o) || (sizeof *e_base <= (o) && (o) <= e_len - UNIT))
 #define VALID_ROOT(o) \
   (0 == (o) || (sizeof *e_base <= (o) && (o) <  e_len - UNIT))
+#define VALID_PTR(ptr) \
+  (NULL == (ptr) ||  \
+   ((char*) e_base <= (char*) ptr) || \
+   ((char*) ptr < (char*) e_base + e_len))
 
 #define SANITY_CHECKS                                         \
   do {                                                        \
@@ -47,16 +53,21 @@ static size_t  e_len;   /* length of in-memory image */
              && VALID_ROOT(e_base->root) ));                  \
   } while (0)
 
-void * pmem_o2p(pmo_t o) {  /* convert offset to pointer */
+static void * pmem_o2p(pmo_t o) {  /* convert offset to pointer */
   assert(VALID(o));
   return 0 == o ? NULL : (char *)e_base + o;
+}
+
+static pmo_t pmem_p2o(void* ptr) {  /* convert pointer to offset */
+  assert(VALID_PTR(ptr));
+  return NULL == ptr ? 0 : (char *)ptr - (char*) e_base;
 }
 
 #define P2O(p) ((pmo_t)((char *)(p) - (char *)e_base))
 
 #define RL return __LINE__  /* indicates where error occurs */
 
-int pmem_map(const char * const file) {
+static int pmem_map(const char * const file) {
   int fd, prot = PROT_READ | PROT_WRITE, flag = MAP_SHARED;
   long int pgsz;  struct stat sb;  size_t s;  pmh_s *t;
   SANITY_CHECKS;
@@ -94,7 +105,7 @@ int pmem_map(const char * const file) {
   return 0;
 }
 
-pmo_t pmem_alloc(size_t n) {  /* "bump-pointer" allocator */
+static pmo_t pmem_alloc(size_t n) {  /* "bump-pointer" allocator */
   pmo_t r;
   SANITY_CHECKS;
   assert(NULL != e_base);
@@ -110,7 +121,7 @@ pmo_t pmem_alloc(size_t n) {  /* "bump-pointer" allocator */
   return r;
 }
 
-int pmem_unmap(void) {
+static int pmem_unmap(void) {
   SANITY_CHECKS;
   if (NULL == e_base)              RL;
   if (0 != munmap(e_base, e_len))  RL;
@@ -119,14 +130,46 @@ int pmem_unmap(void) {
   return 0;
 }
 
-void pmem_set_root(pmo_t o) {
+static void pmem_set_root(pmo_t o) {
   SANITY_CHECKS;
   assert(NULL != e_base && VALID_ROOT(o));
   e_base->root = o;
 }
 
-pmo_t pmem_get_root(void) {
+static pmo_t pmem_get_root(void) {
   SANITY_CHECKS;
   assert(NULL != e_base);
   return e_base->root;
+}
+
+int pma_init(const char * const file) {
+  // TODO
+  return -1;
+}
+
+void pma_set_root(void* ptr) {
+  pmo_t o = pmem_p2o(ptr);
+  pmem_set_root(o);
+}
+
+void* pma_get_root(void) {
+  pmo_t o = pmem_get_root();
+  return pmem_o2p(o);
+}
+
+void* pma_alloc(size_t size) {
+  pmo_t o = pmem_alloc(size);
+  return pmem_o2p(o);
+}
+
+void* pma_calloc(size_t count, size_t size) {
+  return pma_alloc(size * count);
+}
+
+void* pma_realloc(void* ptr, size_t size) {
+  return pma_alloc(size);
+}
+
+void pma_free(void* ptr) {
+  // does nothing as this simple bump-based allocator doesn't have a notion of freeing memory
 }
