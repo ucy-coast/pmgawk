@@ -2,9 +2,12 @@
    Minimalist generic persistent memory infrastructure:  Implementation. */
 
 #include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -143,8 +146,26 @@ static pmo_t pmem_get_root(void) {
 }
 
 int pma_init(const char * const file) {
-  // TODO
-  return -1;
+  int ret;
+  int fd;
+  const size_t pmem_size = 1024*1024*1024;
+
+  // Create empty backing file if one doesn't exist
+  if (access(file, F_OK) != 0) {
+    if ((fd = open(file, O_CREAT|O_TRUNC|O_RDWR, S_IWUSR|S_IRUSR)) < 0) {
+      ret = fd;
+      goto done;  
+    }
+    if ((ret = ftruncate(fd, pmem_size)) < 0) {
+      goto done;
+    }  
+  }
+
+  // TODO: remap heap back to the previous region
+  ret = pmem_map(file);
+
+done:
+  return ret;
 }
 
 void pma_set_root(void* ptr) {

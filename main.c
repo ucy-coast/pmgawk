@@ -605,7 +605,6 @@ usage(int exitval, FILE *fp)
 	fputs(_("POSIX options:\t\tGNU long options: (standard)\n"), fp);
 	fputs(_("\t-f progfile\t\t--file=progfile\n"), fp);
 	fputs(_("\t-F fs\t\t\t--field-separator=fs\n"), fp);
-	fputs(_("\t\t\t\t--persist=file\n"), fp);
 	fputs(_("\t-v var=val\t\t--assign=var=val\n"), fp);
 	fputs(_("Short options:\t\tGNU long options: (extensions)\n"), fp);
 	fputs(_("\t-b\t\t\t--characters-as-bytes\n"), fp);
@@ -630,6 +629,7 @@ usage(int exitval, FILE *fp)
 	fputs(_("\t-n\t\t\t--non-decimal-data\n"), fp);
 	fputs(_("\t-o[file]\t\t--pretty-print[=file]\n"), fp);
 	fputs(_("\t-O\t\t\t--optimize\n"), fp);
+	fputs(_("\t\t\t\t--persist=file\n"), fp);
 	fputs(_("\t-p[file]\t\t--profile[=file]\n"), fp);
 	fputs(_("\t-P\t\t\t--posix\n"), fp);
 	fputs(_("\t-r\t\t\t--re-interval\n"), fp);
@@ -637,6 +637,7 @@ usage(int exitval, FILE *fp)
 	fputs(_("\t-S\t\t\t--sandbox\n"), fp);
 	fputs(_("\t-t\t\t\t--lint-old\n"), fp);
 	fputs(_("\t-V\t\t\t--version\n"), fp);
+
 #ifdef NOSTALGIA
 	fputs(_("\t-W nostalgia\t\t--nostalgia\n"), fp);
 #endif
