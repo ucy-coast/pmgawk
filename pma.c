@@ -7,12 +7,24 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "pma.h"
+
+// Use (void) to silent unused warnings.
+#define assertm(exp, msg) assert(((void)msg, exp))
+
+#define S1(s) #s
+#define S2(s) S1(s)
+#define COORDS __FILE__ ":" S2(__LINE__) ": "
+#define CK2(e, msg) do { if (!(e)) { fprintf(stderr, "%s failed: '%s' %s\n",  COORDS , #e, msg); abort(); } } while (0)
+#define CK3(e, msg1, msg2) CK2(e, msg1 + " (" + msg2 + ")")
+#define CK(e) CK2(e, "")
+//#define FAIL(msg) do { std::cerr << COORDS << "failed: " << msg << std::endl; abort(); } while (0)
 
 typedef uintptr_t pmo_t;  /* "persistent memory offset type" */
 
@@ -70,7 +82,8 @@ static pmo_t pmem_p2o(void* ptr) {  /* convert pointer to offset */
 
 #define RL return __LINE__  /* indicates where error occurs */
 
-static int pmem_map(const char * const file) {
+// Maps `file` at starting address `addr`
+static int pmem_map(const char * const file, void* addr) {
   int fd, prot = PROT_READ | PROT_WRITE, flag = MAP_SHARED;
   long int pgsz;  struct stat sb;  size_t s;  pmh_s *t;
   SANITY_CHECKS;
@@ -82,7 +95,7 @@ static int pmem_map(const char * const file) {
   if (10 * UNIT + sizeof *t > (s = (size_t)sb.st_size))    RL;
   if (0 != s % (unsigned long)pgsz)                        RL;
   if (MAP_FAILED ==
-      (t = (pmh_s *)mmap(NULL, s, prot, flag, fd, 0)))   {
+      (t = (pmh_s *)mmap(addr, s, prot, flag, fd, 0)))   {
     if (0 != close(fd))  /* don't leak fds ... */          RL;
     else                                                   RL; }
   if (0 != close(fd))                                    {
@@ -145,6 +158,43 @@ static pmo_t pmem_get_root(void) {
   return e_base->root;
 }
 
+void* find_gap_mmap(size_t L) {
+  return mmap(NULL, L, PROT_NONE, MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE, -1, 0);
+}
+
+int find_gap_munmap(void* A, size_t N) {
+  return munmap(A, N);
+}
+
+// Finds a large gap in address space 
+static int find_gap(void** addr, size_t* size) {
+  int ret;
+  void* A;
+  void* Amax = NULL;
+  size_t L = 0, U, Max=0;
+  for (U=1;;U*=2) { /* double upper bound until failure */
+    if (MAP_FAILED == (A = find_gap_mmap(U))) {
+      break;
+    } else {
+      CK(find_gap_munmap(A, U)!=1);
+    }
+  }
+  while (1+L<U) { /* binary search between bounds */
+    size_t M = L + (U - L) / 2; /* avoid overflow */
+    if (MAP_FAILED == (A = find_gap_mmap(M))) {
+      U = M;
+    } else {
+      Amax = A;
+      Max = M;
+      CK(find_gap_munmap(A, M)!=1);
+      L = M;
+    }
+  }
+  *addr = Amax;
+  *size = Max;
+  return 0;
+}
+
 int pma_init(const char * const file) {
   int ret;
   int fd;
@@ -160,9 +210,11 @@ int pma_init(const char * const file) {
       goto done;
     }  
   }
-
-  // TODO: remap heap back to the previous region
-  ret = pmem_map(file);
+  
+  void* start_addr;
+  size_t size;
+  CK(find_gap(&start_addr, &size) != 1);
+  ret = pmem_map(file, start_addr);
 
 done:
   return ret;
