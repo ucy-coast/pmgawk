@@ -215,6 +215,7 @@ typedef struct Regexp {
 #define RE_NO_BOL	2	/* not allowed to match ^ in regexp */
 
 #include "gawkapi.h"
+#include "pma.h"
 
 /* Stuff for losing systems. */
 #if !defined(HAVE_STRTOD)
@@ -1196,6 +1197,7 @@ extern enum do_flag_values {
 #define do_sandbox          (do_flags & DO_SANDBOX)
 #define do_debug            (do_flags & DO_DEBUG)
 #define do_mpfr             (do_flags & DO_MPFR)
+#define do_persist          (do_flags & DO_PERSIST)
 
 extern bool do_optimize;
 extern int use_lc_numeric;
@@ -1774,6 +1776,8 @@ extern bool using_utf8(void);
 /* symbol.c */
 extern void load_symbols();
 extern void init_symbol_table();
+extern void *init_persistent();
+extern void load_persistent(void *root);
 extern NODE *symbol_table;
 extern NODE *func_table;
 extern NODE *install_symbol(const char *name, NODETYPE type);

@@ -50,7 +50,9 @@ typedef void *stackoverflow_context_t;
 #define DEFAULT_PREC		53
 #define DEFAULT_ROUNDMODE	"N"		/* round to nearest */
 
+#if defined(SUPPORT_PERSIST)
 #define PERSIST 1000
+#endif
 
 static const char *varfile = DEFAULT_VARFILE;
 const char *command_file = NULL;	/* debugger commands */
@@ -170,7 +172,10 @@ const char def_strftime_format[] = "%a %b %e %H:%M:%S %Z %Y";
 
 extern const char *version_string;
 
+#if defined(SUPPORT_PERSIST)
+static const char * const persist_name = "persist";
 char* persist_backingfilename = NULL;
+#endif
 
 #if defined (HAVE_GETGROUPS) && defined(NGROUPS_MAX) && NGROUPS_MAX > 0
 GETGROUPS_T *groupset;		/* current group set */
@@ -203,7 +208,9 @@ static const struct option optab[] = {
 	{ "no-optimize",	no_argument,		NULL,	's' },
 	{ "nostalgia",		no_argument,		& do_nostalgia,	1 },
 	{ "optimize",		no_argument,		NULL,	'O' },
-	{ "persist", required_argument, NULL, PERSIST },
+#if defined(SUPPORT_PERSIST)
+	{ persist_name,         required_argument,      NULL,   PERSIST },
+#endif
 #if defined(YYDEBUG) || defined(GAWKDEBUG)
 	{ "parsedebug",		no_argument,		NULL,	'Y' },
 #endif
@@ -250,6 +257,32 @@ main(int argc, char **argv)
 
 	if (argc < 2)
 		usage(EXIT_FAILURE, stderr);
+
+#if defined(SUPPORT_PERSIST)
+	/* get backing filename first */
+	for (int optind = 1; optind < argc; optind++)
+	{
+		const char *n = persist_name;
+		char *opt = argv[optind]+1;
+		if (*opt++ == '-')
+		{
+			for (; *n == *opt; n++, opt++);
+			if (*opt && *opt++ != '=') continue;
+			persist_backingfilename = opt;
+			if (!*n) break;
+		}
+	}
+
+	if (!persist_backingfilename)
+	{
+		fprintf(stderr,
+			_("required flag `--persist` and an argument\n"));
+		exit(EXIT_FAILURE);
+	}
+	if (pma_init(persist_backingfilename) < 0) {
+		fatal(_("persistent memory allocator failed to initialize"));
+	}
+#endif
 
 	if ((cp = getenv("GAWK_LOCALE_DIR")) != NULL)
 		locale_dir = cp;
@@ -314,14 +347,6 @@ main(int argc, char **argv)
 	push_context(new_context());
 
 	parse_args(argc, argv);
-
-#if defined(SUPPORT_PERSIST)
-	if (persist_backingfilename) {
-		if (pma_init(persist_backingfilename) < 0) {
-			fatal(_("persistent memory allocator failed to initialize"));
-		}
-	}
-#endif
 
 #if defined(LOCALEDEBUG)
 	if (locale != initial_locale)
@@ -1733,10 +1758,6 @@ parse_args(int argc, char **argv)
 			break;
 
 		case PERSIST:
-			if (optarg[0] == '\0')
-				warning(_("empty argument to `--persist' ignored"));
-			else
-				persist_backingfilename = optarg;
 			break;
 
 		case 'Y':

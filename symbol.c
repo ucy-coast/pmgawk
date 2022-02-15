@@ -55,9 +55,20 @@ static bool installing_specials = false;
 void
 init_symbol_table()
 {
+#if defined(SUPPORT_PERSIST)
+	if (pma_get_root() != 0)
+		global_table = (NODE *)pma_get_root();
+	else
+	{
+#endif
+
 	getnode(global_table);
 	memset(global_table, '\0', sizeof(NODE));
 	null_array(global_table);
+
+#if defined(SUPPORT_PERSIST)
+	}
+#endif
 
 	getnode(param_table);
 	memset(param_table, '\0', sizeof(NODE));
@@ -66,8 +77,22 @@ init_symbol_table()
 	installing_specials = true;
 	func_table = install_symbol(estrdup("FUNCTAB", 7), Node_var_array);
 
+#if defined(SUPPORT_PERSIST)
+	if (pma_get_root() != 0)
+		symbol_table = lookup("SYMTAB");
+	else
+	{
+#endif
+
 	symbol_table = install_symbol(estrdup("SYMTAB", 6), Node_var_array);
 	installing_specials = false;
+
+#if defined(SUPPORT_PERSIST)
+	}
+
+	if (pma_get_root() == 0)
+		pma_set_root(global_table);
+#endif
 }
 
 /*
