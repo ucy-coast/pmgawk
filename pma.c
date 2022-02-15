@@ -241,7 +241,9 @@ void* pma_calloc(size_t count, size_t size) {
 }
 
 void* pma_realloc(void* ptr, size_t size) {
-  return pma_alloc(size);
+  void *tmp = pma_alloc(size);
+  memcpy(tmp, ptr, size);
+  return tmp;
 }
 
 void pma_free(void* ptr) {
