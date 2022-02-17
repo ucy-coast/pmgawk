@@ -231,6 +231,7 @@ void* pma_get_root(void) {
 }
 
 void* pma_alloc(size_t size) {
+  printf("pma_alloc\n");
   pmo_t o = pmem_alloc(size);
   return pmem_o2p(o);
 }

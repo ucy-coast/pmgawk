@@ -315,11 +315,13 @@ main(int argc, char **argv)
 
 	parse_args(argc, argv);
 
+#if defined(SUPPORT_PERSIST)
 	if (persist_backingfilename) {
 		if (pma_init(persist_backingfilename) < 0) {
 			fatal(_("persistent memory allocator failed to initialize"));
 		}
 	}
+#endif
 
 #if defined(LOCALEDEBUG)
 	if (locale != initial_locale)
