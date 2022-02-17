@@ -397,6 +397,9 @@
 /* enable built-in intdiv0 function */
 #undef SUPPLY_INTDIV
 
+/* enable persistence support */
+#undef SUPPORT_PERSIST
+
 /* some systems define this type here */
 #undef TIME_T_IN_SYS_TYPES_H
 

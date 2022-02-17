@@ -64,6 +64,13 @@ AC_ARG_ENABLE([builtin-intdiv0],
 		rm foo
 	fi
 )
+AC_ARG_ENABLE([persist],
+	[AS_HELP_STRING([--enable-persist],[compile in gawk persistence support])],
+	if test "$enableval" = yes
+	then
+		AC_DEFINE(SUPPORT_PERSIST, 1, [enable persistence support])
+	fi
+)
 
 SKIP_MPFR=no
 AC_ARG_ENABLE([mpfr],

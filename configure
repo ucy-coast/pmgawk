@@ -798,6 +798,7 @@ enable_option_checking
 enable_silent_rules
 enable_lint
 enable_builtin_intdiv0
+enable_persist
 enable_mpfr
 enable_versioned_extension_dir
 enable_dependency_tracking
@@ -1455,6 +1456,7 @@ Optional Features:
   --disable-lint          do not compile in gawk lint checking
   --enable-builtin-intdiv0
                           enable built-in intdiv0 function
+  --enable-persist        compile in gawk persistence support
   --disable-mpfr          do not check for MPFR
   --enable-versioned-extension-dir
                           use a versioned directory for extensions
@@ -3644,6 +3646,18 @@ printf "%s\n" "#define SUPPLY_INTDIV 1" >>confdefs.h
 @set INTDIV' < "$srcdir"/doc/gawktexi.in > foo
 		cp foo "$srcdir"/doc/gawktexi.in
 		rm foo
+	fi
+
+fi
+
+# Check whether --enable-persist was given.
+if test ${enable_persist+y}
+then :
+  enableval=$enable_persist; if test "$enableval" = yes
+	then
+
+printf "%s\n" "#define SUPPORT_PERSIST 1" >>confdefs.h
+
 	fi
 
 fi
