@@ -1391,7 +1391,11 @@ extern void r_freeblock(void *, int id);
 #define	ezalloc(var,ty,x,str)	(void) (var = (ty) ezalloc_real((size_t)(x), str, #var, __FILE__, __LINE__))
 #define	erealloc(var,ty,x,str)	(void) (var = (ty) erealloc_real((void *) var, (size_t)(x), str, #var, __FILE__, __LINE__))
 
-#define efree(p)	free(p)
+#if defined(SUPPORT_PERSIST)
+# define efree(p)	pma_free(p)
+#else
+# define efree(p)	free(p)
+#endif
 
 #define fatal		(*(set_loc(__FILE__, __LINE__), r_fatal))
 
