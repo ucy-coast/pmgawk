@@ -279,7 +279,7 @@ main(int argc, char **argv)
 			_("required flag `--persist` and an argument\n"));
 		exit(EXIT_FAILURE);
 	}
-	if (pma_init(persist_backingfilename) < 0) {
+	if (pma_init(2, persist_backingfilename) < 0) {
 		fatal(_("persistent memory allocator failed to initialize"));
 	}
 #endif

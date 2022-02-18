@@ -195,7 +195,7 @@ static int find_gap(void** addr, size_t* size) {
   return 0;
 }
 
-int pma_init(const char * const file) {
+int pma_init(int verbose, const char * const file) {
   int ret;
   int fd;
   const size_t pmem_size = 1024*1024*1024;
@@ -230,17 +230,17 @@ void* pma_get_root(void) {
   return pmem_o2p(o);
 }
 
-void* pma_alloc(size_t size) {
+void* pma_malloc(size_t size) {
   pmo_t o = pmem_alloc(size);
   return pmem_o2p(o);
 }
 
 void* pma_calloc(size_t count, size_t size) {
-  return pma_alloc(size * count);
+  return pma_malloc(size * count);
 }
 
 void* pma_realloc(void* ptr, size_t size) {
-  void *tmp = pma_alloc(size);
+  void *tmp = pma_malloc(size);
   memcpy(tmp, ptr, size);
   return tmp;
 }

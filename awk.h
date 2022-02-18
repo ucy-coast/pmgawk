@@ -2041,7 +2041,7 @@ emalloc_real(size_t count, const char *where, const char *var, const char *file,
 		fatal("%s:%d: emalloc called with zero bytes", file, line);
 
 #if defined(SUPPORT_PERSIST)
-	ret = (void *) pma_alloc(count);
+	ret = (void *) pma_malloc(count);
 #else
 	ret = (void *) malloc(count);
 #endif
