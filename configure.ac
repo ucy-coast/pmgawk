@@ -71,6 +71,11 @@ AC_ARG_ENABLE([persist],
 		AC_DEFINE(SUPPORT_PERSIST, 1, [enable persistence support])
 	fi
 )
+if ! test "${PMAPATH+set}" = set
+then
+	PMAPATH=.
+fi
+AC_SUBST(PMAPATH)
 
 SKIP_MPFR=no
 AC_ARG_ENABLE([mpfr],

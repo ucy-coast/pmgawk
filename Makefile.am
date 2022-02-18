@@ -102,7 +102,7 @@ base_sources = \
 	msg.c \
 	node.c \
 	nonposix.h \
-	pma.c \
+	@PMAPATH@/pma.c \
 	pma.h \
 	profile.c \
 	protos.h \

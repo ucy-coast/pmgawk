@@ -143,14 +143,15 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(includedir)"
 PROGRAMS = $(bin_PROGRAMS)
+am__dirstamp = $(am__leading_dot)dirstamp
 am__objects_1 = array.$(OBJEXT) awkgram.$(OBJEXT) builtin.$(OBJEXT) \
 	cint_array.$(OBJEXT) command.$(OBJEXT) debug.$(OBJEXT) \
 	eval.$(OBJEXT) ext.$(OBJEXT) field.$(OBJEXT) \
 	floatcomp.$(OBJEXT) gawkapi.$(OBJEXT) gawkmisc.$(OBJEXT) \
 	int_array.$(OBJEXT) io.$(OBJEXT) main.$(OBJEXT) mpfr.$(OBJEXT) \
-	msg.$(OBJEXT) node.$(OBJEXT) pma.$(OBJEXT) profile.$(OBJEXT) \
-	re.$(OBJEXT) replace.$(OBJEXT) str_array.$(OBJEXT) \
-	symbol.$(OBJEXT) version.$(OBJEXT)
+	msg.$(OBJEXT) node.$(OBJEXT) @PMAPATH@/pma.$(OBJEXT) \
+	profile.$(OBJEXT) re.$(OBJEXT) replace.$(OBJEXT) \
+	str_array.$(OBJEXT) symbol.$(OBJEXT) version.$(OBJEXT)
 am_gawk_OBJECTS = $(am__objects_1)
 gawk_OBJECTS = $(am_gawk_OBJECTS)
 gawk_LDADD = $(LDADD)
@@ -180,10 +181,10 @@ am__depfiles_remade = ./$(DEPDIR)/array.Po ./$(DEPDIR)/awkgram.Po \
 	./$(DEPDIR)/floatcomp.Po ./$(DEPDIR)/gawkapi.Po \
 	./$(DEPDIR)/gawkmisc.Po ./$(DEPDIR)/int_array.Po \
 	./$(DEPDIR)/io.Po ./$(DEPDIR)/main.Po ./$(DEPDIR)/mpfr.Po \
-	./$(DEPDIR)/msg.Po ./$(DEPDIR)/node.Po ./$(DEPDIR)/pma.Po \
-	./$(DEPDIR)/profile.Po ./$(DEPDIR)/re.Po \
-	./$(DEPDIR)/replace.Po ./$(DEPDIR)/str_array.Po \
-	./$(DEPDIR)/symbol.Po ./$(DEPDIR)/version.Po
+	./$(DEPDIR)/msg.Po ./$(DEPDIR)/node.Po ./$(DEPDIR)/profile.Po \
+	./$(DEPDIR)/re.Po ./$(DEPDIR)/replace.Po \
+	./$(DEPDIR)/str_array.Po ./$(DEPDIR)/symbol.Po \
+	./$(DEPDIR)/version.Po @PMAPATH@/$(DEPDIR)/pma.Po
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -401,6 +402,7 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PMAPATH = @PMAPATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 SED = @SED@
@@ -540,7 +542,7 @@ base_sources = \
 	msg.c \
 	node.c \
 	nonposix.h \
-	pma.c \
+	@PMAPATH@/pma.c \
 	pma.h \
 	profile.c \
 	protos.h \
@@ -667,6 +669,14 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+@PMAPATH@/$(am__dirstamp):
+	@$(MKDIR_P) @PMAPATH@
+	@: > @PMAPATH@/$(am__dirstamp)
+@PMAPATH@/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) @PMAPATH@/$(DEPDIR)
+	@: > @PMAPATH@/$(DEPDIR)/$(am__dirstamp)
+@PMAPATH@/pma.$(OBJEXT): @PMAPATH@/$(am__dirstamp) \
+	@PMAPATH@/$(DEPDIR)/$(am__dirstamp)
 
 gawk$(EXEEXT): $(gawk_OBJECTS) $(gawk_DEPENDENCIES) $(EXTRA_gawk_DEPENDENCIES) 
 	@rm -f gawk$(EXEEXT)
@@ -674,6 +684,7 @@ gawk$(EXEEXT): $(gawk_OBJECTS) $(gawk_DEPENDENCIES) $(EXTRA_gawk_DEPENDENCIES)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f @PMAPATH@/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -696,13 +707,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpfr.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/msg.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/node.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pma.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/profile.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/re.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/replace.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/str_array.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symbol.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@@PMAPATH@/$(DEPDIR)/pma.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -1092,6 +1103,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f @PMAPATH@/$(DEPDIR)/$(am__dirstamp)
+	-rm -f @PMAPATH@/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -1123,13 +1136,13 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/mpfr.Po
 	-rm -f ./$(DEPDIR)/msg.Po
 	-rm -f ./$(DEPDIR)/node.Po
-	-rm -f ./$(DEPDIR)/pma.Po
 	-rm -f ./$(DEPDIR)/profile.Po
 	-rm -f ./$(DEPDIR)/re.Po
 	-rm -f ./$(DEPDIR)/replace.Po
 	-rm -f ./$(DEPDIR)/str_array.Po
 	-rm -f ./$(DEPDIR)/symbol.Po
 	-rm -f ./$(DEPDIR)/version.Po
+	-rm -f @PMAPATH@/$(DEPDIR)/pma.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-local distclean-tags
@@ -1196,13 +1209,13 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/mpfr.Po
 	-rm -f ./$(DEPDIR)/msg.Po
 	-rm -f ./$(DEPDIR)/node.Po
-	-rm -f ./$(DEPDIR)/pma.Po
 	-rm -f ./$(DEPDIR)/profile.Po
 	-rm -f ./$(DEPDIR)/re.Po
 	-rm -f ./$(DEPDIR)/replace.Po
 	-rm -f ./$(DEPDIR)/str_array.Po
 	-rm -f ./$(DEPDIR)/symbol.Po
 	-rm -f ./$(DEPDIR)/version.Po
+	-rm -f @PMAPATH@/$(DEPDIR)/pma.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

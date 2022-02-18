@@ -722,6 +722,7 @@ build_vendor
 build_cpu
 build
 pkgextensiondir
+PMAPATH
 AM_BACKSLASH
 AM_DEFAULT_VERBOSITY
 AM_DEFAULT_V
@@ -3660,6 +3661,11 @@ printf "%s\n" "#define SUPPORT_PERSIST 1" >>confdefs.h
 
 	fi
 
+fi
+
+if ! test "${PMAPATH+set}" = set
+then
+	PMAPATH=.
 fi
 
 
