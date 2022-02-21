@@ -1392,11 +1392,7 @@ extern void r_freeblock(void *, int id);
 #define	ezalloc(var,ty,x,str)	(void) (var = (ty) ezalloc_real((size_t)(x), str, #var, __FILE__, __LINE__))
 #define	erealloc(var,ty,x,str)	(void) (var = (ty) erealloc_real((void *) var, (size_t)(x), str, #var, __FILE__, __LINE__))
 
-#if defined(SUPPORT_PERSIST)
-# define efree(p)	pma_free(p)
-#else
 # define efree(p)	free(p)
-#endif
 
 #define fatal		(*(set_loc(__FILE__, __LINE__), r_fatal))
 
@@ -2037,11 +2033,7 @@ emalloc_real(size_t count, const char *where, const char *var, const char *file,
 	if (count == 0)
 		fatal("%s:%d: emalloc called with zero bytes", file, line);
 
-#if defined(SUPPORT_PERSIST)
-	ret = (void *) pma_malloc(count);
-#else
 	ret = (void *) malloc(count);
-#endif
 	if (ret == NULL)
 		fatal(_("%s:%d:%s: %s: cannot allocate %ld bytes of memory: %s"),
 			file, line, where, var, (long) count, strerror(errno));
@@ -2059,11 +2051,7 @@ ezalloc_real(size_t count, const char *where, const char *var, const char *file,
 	if (count == 0)
 		fatal("%s:%d: ezalloc called with zero bytes", file, line);
 
-#if defined(SUPPORT_PERSIST)
-	ret = (void *) pma_calloc(1, count);
-#else
 	ret = (void *) calloc(1, count);
-#endif
 	if (ret == NULL)
 		fatal(_("%s:%d:%s: %s: cannot allocate %ld bytes of memory: %s"),
 			file, line, where, var, (long) count, strerror(errno));
@@ -2081,11 +2069,7 @@ erealloc_real(void *ptr, size_t count, const char *where, const char *var, const
 	if (count == 0)
 		fatal("%s:%d: erealloc called with zero bytes", file, line);
 
-#if defined(SUPPORT_PERSIST)
-	ret = (void *) pma_realloc(ptr, count);
-#else
 	ret = (void *) realloc(ptr, count);
-#endif
 	if (ret == NULL)
 		fatal(_("%s:%d:%s: %s: cannot reallocate %ld bytes of memory: %s"),
 			file, line, where, var, (long) count, strerror(errno));
