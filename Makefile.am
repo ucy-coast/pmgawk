@@ -102,7 +102,6 @@ base_sources = \
 	msg.c \
 	node.c \
 	nonposix.h \
-	@PMAPATH@/pma.c \
 	pma.h \
 	profile.c \
 	protos.h \
@@ -116,7 +115,7 @@ gawk_SOURCES = $(base_sources)
 
 # Get extra libs as needed, Automake will supply LIBINTL and SOCKET_LIBS.
 LDADD = support/libsupport.a \
-	$(LIBSIGSEGV) $(LIBINTL) $(SOCKET_LIBS) $(LIBREADLINE) $(LIBMPFR)
+	$(LIBSIGSEGV) $(LIBINTL) $(SOCKET_LIBS) $(LIBREADLINE) $(LIBMPFR) $(LIBPMA)
 
 # Directory for gawk's data files. Automake supplies datadir.
 pkgdatadir = $(datadir)/awk
