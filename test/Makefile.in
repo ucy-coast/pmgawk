@@ -1875,7 +1875,7 @@ NEED_TESTOUTCMP = \
 	beginfile2 double2 exit fmttest hsprint posix profile5 space
 
 CMP = cmp
-AWKPROG = ../gawk$(EXEEXT)
+AWKPROG = $(srcdir)/pawk-wrapper.sh
 SORT = sort
 
 # Default for VALGRIND is empty unless overridden by a command-line argument.
@@ -2450,7 +2450,7 @@ rsstart3::
 rtlenmb::
 	@echo $@
 	@-[ -z "$$GAWKLOCALE" ] && GAWKLOCALE=en_US.UTF-8; export GAWKLOCALE ; \
-	"$(srcdir)"/rtlen.sh >_$@ || echo EXIT CODE: $$? >>_$@
+	AWK="$(AWKPROG)" "$(srcdir)"/rtlen.sh >_$@ || echo EXIT CODE: $$? >>_$@
 	@-$(CMP) "$(srcdir)"/$@.ok _$@ && rm -f _$@
 
 nofile::
