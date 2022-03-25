@@ -20,7 +20,7 @@ AC_DEFUN([GAWK_CHECK_PMA],
   if test "$_do_pma" != "no" ; then
      if test -d "$withval" ; then
         CPPFLAGS="${CPPFLAGS} -I$withval/include"
-        LDFLAGS="${LDFLAGS} -L$withval/lib"
+        LDFLAGS="${LDFLAGS} -L$withval/lib -no-pie"
      fi
 
         _pma_save_libs=$LIBS
