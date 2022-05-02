@@ -1,0 +1,4 @@
+a wonderful king is pmgawk
+the gnu plays well with pmgawk
+but what helps it to thrive
+are gawk and pma

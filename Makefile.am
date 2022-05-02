@@ -164,6 +164,7 @@ uninstall-recursive: uninstall-links
 
 # force there to be a gawk executable before running tests
 check-local: gawk$(EXEEXT)
+	cp "$(top_srcdir)/gawk-pma-test-wrapper.sh.in" "$(top_builddir)/gawk-pma-test-wrapper.sh"
 
 # A little extra clean up when making distributions.
 dist-hook:

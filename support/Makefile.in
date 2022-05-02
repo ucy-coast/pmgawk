@@ -111,6 +111,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@PMA_BUILTIN_TRUE@am__append_1 = \
+@PMA_BUILTIN_TRUE@	pma.c \
+@PMA_BUILTIN_TRUE@	pma.h
+
 subdir = support
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/arch.m4 \
@@ -121,9 +125,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/arch.m4 \
 	$(top_srcdir)/m4/lib-prefix.m4 $(top_srcdir)/m4/libsigsegv.m4 \
 	$(top_srcdir)/m4/longlong.m4 $(top_srcdir)/m4/mpfr.m4 \
 	$(top_srcdir)/m4/nls.m4 $(top_srcdir)/m4/noreturn.m4 \
-	$(top_srcdir)/m4/pma.m4 $(top_srcdir)/m4/po.m4 \
-	$(top_srcdir)/m4/progtest.m4 $(top_srcdir)/m4/readline.m4 \
-	$(top_srcdir)/m4/socket.m4 \
+	$(top_srcdir)/m4/po.m4 $(top_srcdir)/m4/progtest.m4 \
+	$(top_srcdir)/m4/readline.m4 $(top_srcdir)/m4/socket.m4 \
 	$(top_srcdir)/m4/triplet-transformation.m4 \
 	$(top_srcdir)/m4/ulonglong.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -141,14 +144,23 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libsupport_a_AR = $(AR) $(ARFLAGS)
 libsupport_a_LIBADD =
+am__libsupport_a_SOURCES_DIST = attribute.h cdefs.h dfa.c dfa.h \
+	dynarray.h flexmember.h getopt.c getopt.h getopt1.c \
+	getopt_int.h idx.h intprops.h libc-config.h localeinfo.c \
+	localeinfo.h random.c random.h regex.c regex.h verify.h \
+	xalloc.h malloc/dynarray.h malloc/dynarray_at_failure.c \
+	malloc/dynarray_emplace_enlarge.c malloc/dynarray_finalize.c \
+	malloc/dynarray_resize.c malloc/dynarray_resize_clear.c pma.c \
+	pma.h
 am__dirstamp = $(am__leading_dot)dirstamp
+@PMA_BUILTIN_TRUE@am__objects_1 = pma.$(OBJEXT)
 am_libsupport_a_OBJECTS = dfa.$(OBJEXT) getopt.$(OBJEXT) \
 	getopt1.$(OBJEXT) localeinfo.$(OBJEXT) random.$(OBJEXT) \
 	regex.$(OBJEXT) malloc/dynarray_at_failure.$(OBJEXT) \
 	malloc/dynarray_emplace_enlarge.$(OBJEXT) \
 	malloc/dynarray_finalize.$(OBJEXT) \
 	malloc/dynarray_resize.$(OBJEXT) \
-	malloc/dynarray_resize_clear.$(OBJEXT)
+	malloc/dynarray_resize_clear.$(OBJEXT) $(am__objects_1)
 libsupport_a_OBJECTS = $(am_libsupport_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -167,7 +179,7 @@ depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/dfa.Po ./$(DEPDIR)/getopt.Po \
 	./$(DEPDIR)/getopt1.Po ./$(DEPDIR)/localeinfo.Po \
-	./$(DEPDIR)/random.Po ./$(DEPDIR)/regex.Po \
+	./$(DEPDIR)/pma.Po ./$(DEPDIR)/random.Po ./$(DEPDIR)/regex.Po \
 	malloc/$(DEPDIR)/dynarray_at_failure.Po \
 	malloc/$(DEPDIR)/dynarray_emplace_enlarge.Po \
 	malloc/$(DEPDIR)/dynarray_finalize.Po \
@@ -187,7 +199,7 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libsupport_a_SOURCES)
-DIST_SOURCES = $(libsupport_a_SOURCES)
+DIST_SOURCES = $(am__libsupport_a_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -221,6 +233,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+AWKPROG_TEST = @AWKPROG_TEST@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -255,7 +268,6 @@ LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
 LIBMPFR = @LIBMPFR@
 LIBOBJS = @LIBOBJS@
-LIBPMA = @LIBPMA@
 LIBREADLINE = @LIBREADLINE@
 LIBS = @LIBS@
 LIBSIGSEGV = @LIBSIGSEGV@
@@ -286,6 +298,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SOCKET_LIBS = @SOCKET_LIBS@
 STRIP = @STRIP@
+TEST_OUTPUT_SUFFIX = @TEST_OUTPUT_SUFFIX@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 XGETTEXT = @XGETTEXT@
@@ -367,35 +380,13 @@ EXTRA_DIST = \
 
 # what to make and install
 noinst_LIBRARIES = libsupport.a
-libsupport_a_SOURCES = \
-	attribute.h \
-	cdefs.h \
-	dfa.c \
-	dfa.h \
-	dynarray.h \
-	flexmember.h \
-	getopt.c \
-	getopt.h \
-	getopt1.c \
-	getopt_int.h \
-	idx.h \
-	intprops.h \
-	libc-config.h \
-	localeinfo.c \
-	localeinfo.h \
-	random.c \
-	random.h \
-	regex.c \
-	regex.h \
-	verify.h \
-	xalloc.h \
-	malloc/dynarray.h \
-	malloc/dynarray_at_failure.c \
-	malloc/dynarray_emplace_enlarge.c  \
-	malloc/dynarray_finalize.c \
-	malloc/dynarray_resize.c \
-	malloc/dynarray_resize_clear.c
-
+libsupport_a_SOURCES = attribute.h cdefs.h dfa.c dfa.h dynarray.h \
+	flexmember.h getopt.c getopt.h getopt1.c getopt_int.h idx.h \
+	intprops.h libc-config.h localeinfo.c localeinfo.h random.c \
+	random.h regex.c regex.h verify.h xalloc.h malloc/dynarray.h \
+	malloc/dynarray_at_failure.c malloc/dynarray_emplace_enlarge.c \
+	malloc/dynarray_finalize.c malloc/dynarray_resize.c \
+	malloc/dynarray_resize_clear.c $(am__append_1)
 
 # For some make's, e.g. OpenBSD, that don't define this
 RM = rm -f
@@ -468,6 +459,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt1.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/localeinfo.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pma.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/regex.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@malloc/$(DEPDIR)/dynarray_at_failure.Po@am__quote@ # am--include-marker
@@ -627,6 +619,7 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/getopt.Po
 	-rm -f ./$(DEPDIR)/getopt1.Po
 	-rm -f ./$(DEPDIR)/localeinfo.Po
+	-rm -f ./$(DEPDIR)/pma.Po
 	-rm -f ./$(DEPDIR)/random.Po
 	-rm -f ./$(DEPDIR)/regex.Po
 	-rm -f malloc/$(DEPDIR)/dynarray_at_failure.Po
@@ -683,6 +676,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/getopt.Po
 	-rm -f ./$(DEPDIR)/getopt1.Po
 	-rm -f ./$(DEPDIR)/localeinfo.Po
+	-rm -f ./$(DEPDIR)/pma.Po
 	-rm -f ./$(DEPDIR)/random.Po
 	-rm -f ./$(DEPDIR)/regex.Po
 	-rm -f malloc/$(DEPDIR)/dynarray_at_failure.Po

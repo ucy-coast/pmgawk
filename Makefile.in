@@ -127,9 +127,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/arch.m4 \
 	$(top_srcdir)/m4/lib-prefix.m4 $(top_srcdir)/m4/libsigsegv.m4 \
 	$(top_srcdir)/m4/longlong.m4 $(top_srcdir)/m4/mpfr.m4 \
 	$(top_srcdir)/m4/nls.m4 $(top_srcdir)/m4/noreturn.m4 \
-	$(top_srcdir)/m4/pma.m4 $(top_srcdir)/m4/po.m4 \
-	$(top_srcdir)/m4/progtest.m4 $(top_srcdir)/m4/readline.m4 \
-	$(top_srcdir)/m4/socket.m4 \
+	$(top_srcdir)/m4/po.m4 $(top_srcdir)/m4/progtest.m4 \
+	$(top_srcdir)/m4/readline.m4 $(top_srcdir)/m4/socket.m4 \
 	$(top_srcdir)/m4/triplet-transformation.m4 \
 	$(top_srcdir)/m4/ulonglong.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -158,8 +157,7 @@ gawk_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 gawk_DEPENDENCIES = support/libsupport.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -346,6 +344,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+AWKPROG_TEST = @AWKPROG_TEST@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -380,7 +379,6 @@ LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
 LIBMPFR = @LIBMPFR@
 LIBOBJS = @LIBOBJS@
-LIBPMA = @LIBPMA@
 LIBREADLINE = @LIBREADLINE@
 LIBS = @LIBS@
 LIBSIGSEGV = @LIBSIGSEGV@
@@ -411,6 +409,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SOCKET_LIBS = @SOCKET_LIBS@
 STRIP = @STRIP@
+TEST_OUTPUT_SUFFIX = @TEST_OUTPUT_SUFFIX@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 XGETTEXT = @XGETTEXT@
@@ -1270,6 +1269,7 @@ uninstall-recursive: uninstall-links
 
 # force there to be a gawk executable before running tests
 check-local: gawk$(EXEEXT)
+	cp "$(top_srcdir)/gawk-pma-test-wrapper.sh.in" "$(top_builddir)/gawk-pma-test-wrapper.sh"
 
 # A little extra clean up when making distributions.
 dist-hook:

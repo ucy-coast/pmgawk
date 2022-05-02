@@ -153,7 +153,7 @@ EXTRA_DIST = \
 	backsmalls1.ok \
 	backsmalls2.awk \
 	backsmalls2.ok \
-	badargs.ok \
+	badargs.ok@TEST_OUTPUT_SUFFIX@ \
 	badassign1.awk \
 	badassign1.ok \
 	badbuild.awk \
@@ -1606,7 +1606,7 @@ NEED_TESTOUTCMP = \
 	beginfile2 double2 exit fmttest hsprint posix profile5 space
 
 CMP = cmp
-AWKPROG = $(srcdir)/pawk-wrapper.sh
+AWKPROG = @AWKPROG_TEST@ 
 SORT = sort
 
 # Default for VALGRIND is empty unless overridden by a command-line argument.
@@ -1829,7 +1829,7 @@ argtest::
 badargs::
 	@echo $@
 	@-$(AWK) -f 2>&1 | grep -v patchlevel >_$@ || echo EXIT CODE: $$? >> _$@
-	@-$(CMP) "$(srcdir)"/$@.ok _$@ && rm -f _$@
+	@-$(CMP) "$(srcdir)"/$@.ok@TEST_OUTPUT_SUFFIX@ _$@ && rm -f _$@
 
 strftime::
 	@echo $@

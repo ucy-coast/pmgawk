@@ -120,9 +120,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/arch.m4 \
 	$(top_srcdir)/m4/lib-prefix.m4 $(top_srcdir)/m4/libsigsegv.m4 \
 	$(top_srcdir)/m4/longlong.m4 $(top_srcdir)/m4/mpfr.m4 \
 	$(top_srcdir)/m4/nls.m4 $(top_srcdir)/m4/noreturn.m4 \
-	$(top_srcdir)/m4/pma.m4 $(top_srcdir)/m4/po.m4 \
-	$(top_srcdir)/m4/progtest.m4 $(top_srcdir)/m4/readline.m4 \
-	$(top_srcdir)/m4/socket.m4 \
+	$(top_srcdir)/m4/po.m4 $(top_srcdir)/m4/progtest.m4 \
+	$(top_srcdir)/m4/readline.m4 $(top_srcdir)/m4/socket.m4 \
 	$(top_srcdir)/m4/triplet-transformation.m4 \
 	$(top_srcdir)/m4/ulonglong.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -163,6 +162,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = $(LOCALES) AWKLIBPATH=../extension/.libs $(VALGRIND) $(AWKPROG) $(GAWK_TEST_ARGS)
+AWKPROG_TEST = @AWKPROG_TEST@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -197,7 +197,6 @@ LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
 LIBMPFR = @LIBMPFR@
 LIBOBJS = @LIBOBJS@
-LIBPMA = @LIBPMA@
 LIBREADLINE = @LIBREADLINE@
 LIBS = @LIBS@
 LIBSIGSEGV = @LIBSIGSEGV@
@@ -228,6 +227,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SOCKET_LIBS = @SOCKET_LIBS@
 STRIP = @STRIP@
+TEST_OUTPUT_SUFFIX = @TEST_OUTPUT_SUFFIX@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 XGETTEXT = @XGETTEXT@
@@ -421,7 +421,7 @@ EXTRA_DIST = \
 	backsmalls1.ok \
 	backsmalls2.awk \
 	backsmalls2.ok \
-	badargs.ok \
+	badargs.ok@TEST_OUTPUT_SUFFIX@ \
 	badassign1.awk \
 	badassign1.ok \
 	badbuild.awk \
@@ -1876,7 +1876,7 @@ NEED_TESTOUTCMP = \
 	beginfile2 double2 exit fmttest hsprint posix profile5 space
 
 CMP = cmp
-AWKPROG = $(srcdir)/pawk-wrapper.sh
+AWKPROG = @AWKPROG_TEST@ 
 SORT = sort
 
 # Default for VALGRIND is empty unless overridden by a command-line argument.
@@ -2285,7 +2285,7 @@ argtest::
 badargs::
 	@echo $@
 	@-$(AWK) -f 2>&1 | grep -v patchlevel >_$@ || echo EXIT CODE: $$? >> _$@
-	@-$(CMP) "$(srcdir)"/$@.ok _$@ && rm -f _$@
+	@-$(CMP) "$(srcdir)"/$@.ok@TEST_OUTPUT_SUFFIX@ _$@ && rm -f _$@
 
 strftime::
 	@echo $@

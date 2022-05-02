@@ -71,6 +71,12 @@ libsupport_a_SOURCES = \
 	malloc/dynarray_resize.c \
 	malloc/dynarray_resize_clear.c
 
+if PMA_BUILTIN
+libsupport_a_SOURCES += \
+	pma.c \
+	pma.h
+endif
+
 # For some make's, e.g. OpenBSD, that don't define this
 RM = rm -f
 

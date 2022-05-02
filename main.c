@@ -148,6 +148,7 @@ static bool disallow_var_assigns = false;	/* true for --exec */
 static void add_preassign(enum assign_type type, char *val);
 
 static void parse_args(int argc, char **argv);
+static void parse_args_partial(int argc, char **argv);
 static void set_locale_stuff(void);
 static bool stopped_early = false;
 
@@ -173,7 +174,6 @@ const char def_strftime_format[] = "%a %b %e %H:%M:%S %Z %Y";
 extern const char *version_string;
 
 #if defined(SUPPORT_PERSIST)
-static const char * const persist_name = "persist";
 char* persist_backingfilename = NULL;
 #endif
 
@@ -209,7 +209,7 @@ static const struct option optab[] = {
 	{ "nostalgia",		no_argument,		& do_nostalgia,	1 },
 	{ "optimize",		no_argument,		NULL,	'O' },
 #if defined(SUPPORT_PERSIST)
-	{ persist_name,         required_argument,      NULL,   PERSIST },
+	{ "persist",	required_argument,	NULL, PERSIST },
 #endif
 #if defined(YYDEBUG) || defined(GAWKDEBUG)
 	{ "parsedebug",		no_argument,		NULL,	'Y' },
@@ -259,28 +259,17 @@ main(int argc, char **argv)
 		usage(EXIT_FAILURE, stderr);
 
 #if defined(SUPPORT_PERSIST)
-	/* get backing filename first */
-	for (int optind = 1; optind < argc; optind++)
-	{
-		const char *n = persist_name;
-		char *opt = argv[optind]+1;
-		if (*opt++ == '-')
-		{
-			for (; *n == *opt; n++, opt++);
-			if (*opt && *opt++ != '=') continue;
-			persist_backingfilename = opt;
-			if (!*n) break;
-		}
-	}
-
+	parse_args_partial(argc, argv);
 	if (!persist_backingfilename)
 	{
-		fprintf(stderr,
-			_("required flag `--persist` and an argument\n"));
-		exit(EXIT_FAILURE);
+		/* write usage to stdout, per GNU coding stds */
+		usage(EXIT_SUCCESS, stdout);
 	}
-	if (pma_init(0, persist_backingfilename) < 0) {
-		fatal(_("persistent memory allocator failed to initialize"));
+	if (pma_init(0, persist_backingfilename) != 0) {
+		/* do not call fatal because fatal calls pma_malloc, which requires 
+		 * pma to have successfully been initialized above */
+		fprintf(stderr, "%s: fatal: persistent memory allocator failed to initialize: %s\n", myname, strerror(errno));
+		exit(1);
 	}
 #endif
 
@@ -622,10 +611,17 @@ static void
 usage(int exitval, FILE *fp)
 {
 	/* Not factoring out common stuff makes it easier to translate. */
-	fprintf(fp, _("Usage: %s [POSIX or GNU style options] -f progfile [--] file ...\n"),
-		myname);
-	fprintf(fp, _("Usage: %s [POSIX or GNU style options] [--] %cprogram%c file ...\n"),
-			myname, quote, quote);
+#if defined(SUPPORT_PERSIST)
+	static const char* persist_flag = "--persist=backingfile ";
+	static const char* persist_flag_example = "--persist=/dev/shm/gawk.pma ";
+#else
+	static const char* persist_flag = "";
+	static const char* persist_flag_example = "";
+#endif
+	fprintf(fp, _("Usage: %s [POSIX or GNU style options] %s-f progfile [--] file ...\n"),
+		myname, persist_flag);
+	fprintf(fp, _("Usage: %s [POSIX or GNU style options] %s[--] %cprogram%c file ...\n"),
+			myname, persist_flag, quote, quote);
 
 	/* GNU long options info. This is too many options. */
 
@@ -692,8 +688,8 @@ or by using a web forum such as Stack Overflow.\n\n"), fp);
 By default it reads standard input and writes standard output.\n\n"), fp);
 
 	/* ditto */
-	fprintf(fp, _("Examples:\n\t%s '{ sum += $1 }; END { print sum }' file\n\
-\t%s -F: '{ print $1 }' /etc/passwd\n"), myname, myname);
+	fprintf(fp, _("Examples:\n\t%s %s'{ sum += $1 }; END { print sum }' file\n\
+\t%s %s-F: '{ print $1 }' /etc/passwd\n"), myname, persist_flag_example, myname, persist_flag_example);
 
 	fflush(fp);
 
@@ -1554,6 +1550,99 @@ getenv_long(const char *name)
 	}
 	return -1;
 }
+
+#if defined(SUPPORT_PERSIST)
+
+/* parse_option --- parse command-line option. */
+
+static int parse_option(int argc, char** argv, int *optindp, const struct option optab[], char** argval) {
+	if (optindp == NULL) {
+		return -1;
+	}
+	int optind = *optindp;
+	if (optind + 1 > argc) {
+		return EOF;
+	}
+	*argval = NULL;
+	for (int i=0; optab[i].val != '\0'; i++) {
+		/* parse short option that starts with single dash */
+		if (strlen(argv[optind]) > 1 && argv[optind][0] == '-' && argv[optind][1] != '-')
+		{
+			int optval = optab[i].val;
+			if (argv[optind][1] == optval) {
+				if (optab[i].has_arg == no_argument) {
+					return optval;
+				}
+				if (optab[i].has_arg == required_argument && optind+1 < argc) {
+					*argval = argv[optind+1];
+					*optindp += 1;
+					return optval;				
+				}
+				if (optab[i].has_arg == optional_argument) {
+					if (optind+1 < argc) {
+						*argval = argv[optind+1];
+						*optindp += 1;
+					}
+					return optval;				
+				}
+				return -1;
+			}
+		} 
+		/* parse long option that starts with double dash */
+		else if (strlen(argv[optind]) > 2 && argv[optind][0] == '-' && argv[optind][1] == '-')
+		{
+			int optval = optab[i].val;
+			const char *optname = optab[i].name;
+			const char *opt = &argv[optind][2]; 	
+			char *eqptr = strchr(opt, '=');
+			bool has_arg = (eqptr != NULL);
+			int optlen = has_arg ? eqptr - opt : strlen(opt);
+			if (strncmp(opt, optname, optlen) == 0) {
+				if (optab[i].has_arg == no_argument && has_arg == false) {
+					return optval;
+				}
+				if (optab[i].has_arg == required_argument && has_arg == true) {
+					*argval = eqptr+1;			
+					return optval;
+				}
+				if (optab[i].has_arg == optional_argument) {
+					if (has_arg) {
+						*argval = eqptr+1;
+					}
+					return optval;
+				}
+				return -1;
+			}
+		}
+	}
+	return 0;
+}
+
+/* parse_args_partial --- parse options partially */
+
+/* This function parses arguments partially, looking for the persist flag.
+ * It does not use the getopt and getopt_long functions to avoid messing up with the 
+ * command-line options so that parse_args can be called later for full parsing.
+ */
+
+static void
+parse_args_partial(int argc, char **argv)
+{
+	int c;
+
+	char* argval;
+	/* option processing. ready, set, go! */
+	for (int optind = 1; 
+	     (c = parse_option(argc, argv, &optind, optab, &argval)) != EOF;
+	     optind++) {
+		if (c == PERSIST) {
+			persist_backingfilename = argval;
+			break;
+		}
+	}
+	return;
+}
+#endif
 
 /* parse_args --- do the getopt_long thing */
 

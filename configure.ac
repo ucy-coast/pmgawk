@@ -64,6 +64,26 @@ AC_ARG_ENABLE([builtin-intdiv0],
 		rm foo
 	fi
 )
+AC_ARG_ENABLE([persist],
+	[AS_HELP_STRING([--enable-persist],[enable persistence support])],
+	[if test "$enableval" = yes
+	then
+		AC_DEFINE(SUPPORT_PERSIST, 1, [enable persistence support])
+		pma_builtin=true
+		build_persist=true
+		LDFLAGS="${LDFLAGS} -no-pie"
+		AC_SUBST(AWKPROG_TEST, '../gawk-pma-test-wrapper.sh') 
+		AC_SUBST(TEST_OUTPUT_SUFFIX, '.persist') 
+	else
+		AC_SUBST(AWKPROG_TEST, '../gawk$(EXEEXT)')
+		AC_SUBST(TEST_OUTPUT_SUFFIX, '') 
+	fi],
+	[
+		AC_SUBST(AWKPROG_TEST, '../gawk$(EXEEXT)')
+		AC_SUBST(TEST_OUTPUT_SUFFIX, '') 
+	]
+)
+AM_CONDITIONAL(PMA_BUILTIN, test x$pma_builtin = xtrue)
 
 SKIP_MPFR=no
 AC_ARG_ENABLE([mpfr],
@@ -188,7 +208,9 @@ else
 fi
 
 dnl Check cross compiling
-AM_CONDITIONAL([TEST_CROSS_COMPILE], [test "$build_alias" != "$host_alias"])
+dnl Cross compile awklib scripts when building gawk for a different 
+dnl target or when building gawk with persistence support
+AM_CONDITIONAL([TEST_CROSS_COMPILE], [test "$build_alias" != "$host_alias" -o "x$build_persist" = "xtrue"])
 
 dnl checks for typedefs
 AC_TYPE_PID_T
@@ -442,10 +464,6 @@ case `uname -m` in
 	esac
 	;;
 esac
-
-dnl check for pma support
-GAWK_CHECK_PMA
-
 
 dnl checks for structure members
 AC_CHECK_MEMBERS([struct stat.st_blksize])

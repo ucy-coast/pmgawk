@@ -1,0 +1,8 @@
+easy_ham/
+spam/
+test/
+good_mail-gawk
+good_mail-pmgawk
+spam_mail-gawk
+spam_mail-pmgawk
+spamprobability
