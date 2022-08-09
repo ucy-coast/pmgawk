@@ -1,9 +1,29 @@
 README:
 
-This is persistent gawk (pm-gawk). 
+This is a fork, not the official gawk distribution.
 
-Persistent gawk integrates a new persistent memory allocator, pma, 
-into the GNU AWK interpreter, gawk, to support persistent scripting. 
+This fork implements an early experimental version of a persistent-memory 
+feature that enables persistent scripting in the GNU AWK interpreter, gawk. 
+The new persistent scripting feature, called pm-gawk, can remember script 
+variables across executions and pass variables between unrelated scripts 
+without serializing/parsing text files.
+
+The official gawk distribution supports a similar persistence feature 
+as of version 5.2. For more information regarding the new persistence 
+feature in the official gawk, you can check the main gawk documentation 
+or refer to 'man gawk' and 'info gawk' on any system where gawk is 
+installed. The official gawk documentation is available at:
+
+  https://www.gnu.org/software/gawk/manual/ 
+
+It is strongly suggested that you use the official distribution, 
+unless you are interested in using this experimental prototype for 
+reproducing the results from the persistent scripting paper published 
+in NVMW 2022.
+
+  Persistent Scripting
+  Tan, Zi Fan, Li, Jianan, Volos, Haris, and Kelly, Terence
+  In NVMW ’22: 13th Annual Non-Volatile Memories Workshop 2022
 
 For the original GNU AWK readme file, check README.gawk  
 
@@ -13,21 +33,21 @@ To build persistent gawk, you need access to a recent compiler (gcc8 or later).
 
 To build from source, configure with persistent scripting enabled:
 
-$ ./configure --enable-persist
+  $ I_UNDERSTAND="this is a fork, not real gawk" ./configure --enable-persist
 
 Once the build system is setup, persistent gawk is built using the
 make command at the top level:
 
-$ make
+  $ make
 
 After successful compilation, run the test suite:
 
-$ make check
+  $ make check
 
 There are two known tests that fail, namely fork and fork2. These 
-test failures relate to the current incompatibility between fork and 
-the file-backed memory-mapping approach to persistent memory and 
-should not raise any concern.
+test failures relate to the current incompatibility between fork 
+and the file-backed memory-mapping approach to persistent memory 
+and should not raise any concern.
 
 GETTING STARTED
 
@@ -35,7 +55,7 @@ To use persistent gawk, first create for the persistent heap a
 sparse file whose size is a multiple of the system page size.
 For example, try the following on the command line: 
 
-truncate -s 4096000000 heapfile
+  $ truncate -s 4096000000 heapfile
 
 The media beneath the filesystem containing the backing file are
 unconstrained, i.e., pma supports persistent memory programming 
@@ -49,16 +69,16 @@ whenever it is invoked again with --persist.
 
 For example, to run the word-count example located in examples/wc:
 
-$ truncate -s 4096000000 heapfile
-$ gawk --persist=heapfile -f wc.awk input0.txt
-$ gawk --persist=heapfile -f wc.awk input1.txt
-$ gawk --persist=heapfile -f wc.awk input2.txt
+  $ truncate -s 4096000000 heapfile
+  $ gawk --persist=heapfile -f wc.awk input0.txt
+  $ gawk --persist=heapfile -f wc.awk input1.txt
+  $ gawk --persist=heapfile -f wc.awk input2.txt
 
 The above processes one input per awk invocation and should give 
 equivalent output to processing all inputs in a single invocation
 through regular gawk:
 
-$ gawk -f ./wc.awk input0.txt input1.txt input2.txt
+  $ gawk -f ./wc.awk input0.txt input1.txt input2.txt
 
 
 REFERENCES

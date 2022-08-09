@@ -25,6 +25,29 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT([GNU Awk],[5.1.60],[bug-gawk@gnu.org],[gawk])
 
+# This is a fork, not the official gawk distribution.
+#
+# This fork implements a persistent gawk prototype, called pm-gawk. 
+# pm-gawk integrates a new persistent memory allocator, pma, into 
+# the GNU AWK interpreter, gawk, to support persistent scripting. 
+#
+# The official gawk distribution supports a similar persistence feature 
+# as of July '22.
+#
+# It is strongly suggested that you use the official distribution, unless
+# you are interested in using pm-gawk for reproducing the results from the 
+# paper 'Persistent Scripting' published in NVMW 2022.
+#
+# If you wish to build this prototype, an environment variable must be set:
+#
+# $ I_UNDERSTAND="this is a fork, not real gawk" ./configure ...
+#
+
+if test "$I_UNDERSTAND" != "this is a fork, not real gawk"
+then
+	AC_MSG_ERROR([Deprecate])
+fi
+
 # This is a hack. Different versions of install on different systems
 # are just too different. Chuck it and use install-sh.
 #
